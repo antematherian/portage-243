@@ -80,7 +80,7 @@ class RepoConfig(object):
 		'find_invalid_path_char', 'force', 'format', 'local_config', 'location',
 		'main_repo', 'manifest_hashes', 'masters', 'missing_repo_name',
 		'name', 'portage1_profiles', 'portage1_profiles_compat', 'priority',
-		'profile_formats', 'sign_commit', 'sign_manifest',
+		'profile_formats', 'sign_commit', 'sign_manifest', 'sync_branch',
 		'sync_depth', 'sync_hooks_only_on_change',
 		'sync_type', 'sync_umask', 'sync_uri', 'sync_user', 'thin_manifest',
 		'update_changelog', '_eapis_banned', '_eapis_deprecated',
@@ -173,6 +173,12 @@ class RepoConfig(object):
 			'sync-hooks-only-on-change', 'false').lower() == 'true'
 
 		self.module_specific_options = {}
+
+		#allow repos.conf to specify which branch to sync/use
+		sync_branch = repo_opts.get('sync-branch')
+		if sync_branch is not None:
+			sync_branch = sync_branch.strip()
+		self.sync_branch = sync_branch or None
 
 		# Not implemented.
 		format = repo_opts.get('format')
