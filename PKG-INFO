@@ -1,0 +1,17 @@
+Metadata-Version: 1.1
+Name: portage
+Version: 2.3.2
+Summary: UNKNOWN
+Home-page: https://wiki.gentoo.org/wiki/Project:Portage
+Author: Gentoo Portage Development Team
+Author-email: dev-portage@gentoo.org
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Intended Audience :: System Administrators
+Classifier: License :: OSI Approved :: GNU General Public License v2 (GPLv2)
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Python
+Classifier: Topic :: System :: Installation/Setup
