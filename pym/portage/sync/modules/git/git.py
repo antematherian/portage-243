@@ -56,6 +56,8 @@ class GitSync(NewBase):
 			git_cmd_opts += " --depth %d" % self.repo.sync_depth
 		if self.repo.module_specific_options.get('sync-git-clone-extra-opts'):
 			git_cmd_opts += " %s" % self.repo.module_specific_options['sync-git-clone-extra-opts']
+		if self.repo.sync_branch is not None:
+			git_cmd_opts += " -b %s" % self.repo.sync_branch
 		git_cmd = "%s clone%s %s ." % (self.bin_command, git_cmd_opts,
 			portage._shell_quote(sync_uri))
 		writemsg_level(git_cmd + "\n")
