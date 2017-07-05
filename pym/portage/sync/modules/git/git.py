@@ -74,6 +74,17 @@ class GitSync(NewBase):
 			return (exitcode, False)
 		return (os.EX_OK, True)
 
+	def sync_uri_check(self) 
+		git_cmd = "cd %s && git remote -v" % self.repo.location
+		try:
+			rawremote = subprocess.check_output(git_cmd, shell=True, \
+				universal_newlines=True)
+		except subprocess.CalledProcessError:
+			return False
+		for remoteline in rawremote.split("\n"):
+			rlist = remoteline.split()
+			if rlist[0] == "origin" and rlist[2] == "(fetch)":
+				return self.repo.sync_uri == rlist[1]
 
 	def update(self):
 		''' Update existing git repository, and ignore the syncuri by default. We are
@@ -110,5 +121,10 @@ class GitSync(NewBase):
 
 			return (os.EX_OK, current_rev != previous_rev)
 		else:
-			printf("Test")
+			#Check sync-uri first. If sync-uri doesn't match, nuke the git repository
+			#and start from scratch. This will automagically set the correct 
+			#sync-branch option
+			if self.repo.sync_uri is not None and self.repo.location is not None:
+				if not self.sync_uri_check():
+					print("sync-uri does not match git remote -v")
 			return (os.EX_OK, True)
