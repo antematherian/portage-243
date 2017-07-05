@@ -75,9 +75,9 @@ class GitSync(NewBase):
 		return (os.EX_OK, True)
 
 	def sync_uri_check(self):
-	'''checks that self.repo.sync_uri matches the output of git remote -v i.e.
-	checks if git and repos.conf agree on what the sync-uri is
-	'''
+		'''checks that self.repo.sync_uri matches the output of git remote -v i.e.
+		checks if git and repos.conf agree on what the sync-uri is
+		'''
 		git_cmd = "cd %s && git remote -v" % self.repo.location
 		try:
 			rawremote = subprocess.check_output(git_cmd, shell=True, \
@@ -89,7 +89,7 @@ class GitSync(NewBase):
 			if rlist[0] == "origin" and rlist[2] == "(fetch)":
 				return self.repo.sync_uri == rlist[1]
 	def nuke_repo(self):
-	'''removes the repository'''
+		'''removes the repository'''
 		rm_cmd = "rm -rf"
 		writemsg_level(rm_cmd + "\n")
 		exitcode = portage.process.spawn_bash("%s %s" % (rm_cmd, 
@@ -142,7 +142,6 @@ class GitSync(NewBase):
 			#sync-branch option
 			if self.repo.sync_uri is not None and self.repo.location is not None:
 				if not self.sync_uri_check():
-					print("sync-uri does not match git remote -v")
 					self.nuke_repo()
-					self.new(False)
+					self.new()
 			return (os.EX_OK, True)
