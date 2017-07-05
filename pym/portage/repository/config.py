@@ -202,7 +202,7 @@ class RepoConfig(object):
 		self.format = format
 
 		location = repo_opts.get('location')
-	    if location is not None and location.strip():
+		if location is not None and location.strip():
 			if os.path.isdir(location) or portage._sync_mode:
 				location = os.path.realpath(location)
 		else:
