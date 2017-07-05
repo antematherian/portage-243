@@ -55,7 +55,7 @@ class GitSync(NewBase):
 		if self.repo.sync_depth is not None:
 			git_cmd_opts += " --depth %d" % self.repo.sync_depth
 			#required with shallow cloning to see all the other branches
-			git_cmd_opts += "--no-single-branch"
+			git_cmd_opts += " --no-single-branch"
 		if self.repo.module_specific_options.get('sync-git-clone-extra-opts'):
 			git_cmd_opts += " %s" % self.repo.module_specific_options['sync-git-clone-extra-opts']
 		if self.repo.sync_branch is not None:
