@@ -75,8 +75,8 @@ class RepoConfig(object):
 	"""Stores config of one repository"""
 
 	__slots__ = ('aliases', 'allow_missing_manifest', 'allow_provide_virtual',
-		'auto_sync', 'cache_formats', 'create_manifest', 'disable_manifest',
-		'eapi', 'eclass_db', 'eclass_locations', 'eclass_overrides',
+		'auto_sync', 'auto_sync_enforcing', 'cache_formats', 'create_manifest',
+		 'disable_manifest', 'eapi', 'eclass_db', 'eclass_locations', 'eclass_overrides',
 		'find_invalid_path_char', 'force', 'format', 'local_config', 'location',
 		'main_repo', 'manifest_hashes', 'masters', 'missing_repo_name',
 		'name', 'portage1_profiles', 'portage1_profiles_compat', 'priority',
@@ -177,7 +177,7 @@ class RepoConfig(object):
 		#Therefore, changing eithe sync-branch or sync-uri will trigger
 		#a special subroutine to be called to automagically switch to the
 		#correct origin and branch
-		auto_sync_enforcing = repo.opts.get('auto-sync-enforcing')
+		auto_sync_enforcing = repo_opts.get('auto-sync-enforcing')
 		if auto_sync_enforcing is not None:
 			auto_sync_enforcing = auto_sync_enforcing.strip()
 		self.auto_sync_enforcing = auto_sync_enforcing or None
