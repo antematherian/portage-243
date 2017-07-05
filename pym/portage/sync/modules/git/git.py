@@ -54,6 +54,8 @@ class GitSync(NewBase):
 			git_cmd_opts += " --quiet"
 		if self.repo.sync_depth is not None:
 			git_cmd_opts += " --depth %d" % self.repo.sync_depth
+			#required with shallow cloning to see all the other branches
+			git_cmd_opts += "--no-single-branch"
 		if self.repo.module_specific_options.get('sync-git-clone-extra-opts'):
 			git_cmd_opts += " %s" % self.repo.module_specific_options['sync-git-clone-extra-opts']
 		if self.repo.sync_branch is not None:
@@ -74,34 +76,39 @@ class GitSync(NewBase):
 
 
 	def update(self):
-		''' Update existing git repository, and ignore the syncuri. We are
+		''' Update existing git repository, and ignore the syncuri by default. We are
 		going to trust the user and assume that the user is in the branch
 		that he/she wants updated. We'll let the user manage branches with
-		git directly.
+		git directly. However, if auto-sync-enforcing = yes is set, portage will enforce
+		that the values in the repos.conf files match the ones in the git repositories,
+		and will automagically update the git repositories.
 		'''
+		if self.auto_sync_enforcing == "no" or self.autosync_enforcing is None:
+			git_cmd_opts = ""
+			if self.settings.get("PORTAGE_QUIET") == "1":
+				git_cmd_opts += " --quiet"
+			if self.repo.module_specific_options.get('sync-git-pull-extra-opts'):
+				git_cmd_opts += " %s" % self.repo.module_specific_options['sync-git-pull-extra-opts']
+			git_cmd = "%s pull%s" % (self.bin_command, git_cmd_opts)
+			writemsg_level(git_cmd + "\n")
 
-		git_cmd_opts = ""
-		if self.settings.get("PORTAGE_QUIET") == "1":
-			git_cmd_opts += " --quiet"
-		if self.repo.module_specific_options.get('sync-git-pull-extra-opts'):
-			git_cmd_opts += " %s" % self.repo.module_specific_options['sync-git-pull-extra-opts']
-		git_cmd = "%s pull%s" % (self.bin_command, git_cmd_opts)
-		writemsg_level(git_cmd + "\n")
+			rev_cmd = [self.bin_command, "rev-list", "--max-count=1", "HEAD"]
+			previous_rev = subprocess.check_output(rev_cmd,
+				cwd=portage._unicode_encode(self.repo.location))
 
-		rev_cmd = [self.bin_command, "rev-list", "--max-count=1", "HEAD"]
-		previous_rev = subprocess.check_output(rev_cmd,
-			cwd=portage._unicode_encode(self.repo.location))
+			exitcode = portage.process.spawn_bash("cd %s ; exec %s" % (
+					portage._shell_quote(self.repo.location), git_cmd),
+				**self.spawn_kwargs)
+			if exitcode != os.EX_OK:
+				msg = "!!! git pull error in %s" % self.repo.location
+				self.logger(self.xterm_titles, msg)
+				writemsg_level(msg + "\n", level=logging.ERROR, noiselevel=-1)
+				return (exitcode, False)
 
-		exitcode = portage.process.spawn_bash("cd %s ; exec %s" % (
-				portage._shell_quote(self.repo.location), git_cmd),
-			**self.spawn_kwargs)
-		if exitcode != os.EX_OK:
-			msg = "!!! git pull error in %s" % self.repo.location
-			self.logger(self.xterm_titles, msg)
-			writemsg_level(msg + "\n", level=logging.ERROR, noiselevel=-1)
-			return (exitcode, False)
+			current_rev = subprocess.check_output(rev_cmd,
+				cwd=portage._unicode_encode(self.repo.location))
 
-		current_rev = subprocess.check_output(rev_cmd,
-			cwd=portage._unicode_encode(self.repo.location))
-
-		return (os.EX_OK, current_rev != previous_rev)
+			return (os.EX_OK, current_rev != previous_rev)
+		else:
+			printf("Test")
+			return (os.EX_OK, True)

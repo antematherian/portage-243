@@ -81,7 +81,7 @@ class RepoConfig(object):
 		'main_repo', 'manifest_hashes', 'masters', 'missing_repo_name',
 		'name', 'portage1_profiles', 'portage1_profiles_compat', 'priority',
 		'profile_formats', 'sign_commit', 'sign_manifest', 'sync_branch',
-		'sync_depth', 'sync_hooks_only_on_change',
+		'sync_depth', 'sync_enforcing', 'sync_hooks_only_on_change',
 		'sync_type', 'sync_umask', 'sync_uri', 'sync_user', 'thin_manifest',
 		'update_changelog', '_eapis_banned', '_eapis_deprecated',
 		'_masters_orig', 'module_specific_options',
@@ -168,17 +168,32 @@ class RepoConfig(object):
 			auto_sync = auto_sync.strip().lower()
 		self.auto_sync = auto_sync
 
-		self.sync_depth = repo_opts.get('sync-depth')
-		self.sync_hooks_only_on_change = repo_opts.get(
-			'sync-hooks-only-on-change', 'false').lower() == 'true'
-
-		self.module_specific_options = {}
+		#Defines how the sync-branch sync-uri setting should be treated by portage
+		#auto_sync_enforcing = no will only perform a git pull on the
+		#repository when emerge --sync is called. Same thing 
+		#auto_sync_enforcing = yes will perform an extended check to
+		#make sure that both the sync-uri and sync-branch variables are
+		#match the values returned by git at the location folder.
+		#Therefore, changing eithe sync-branch or sync-uri will trigger
+		#a special subroutine to be called to automagically switch to the
+		#correct origin and branch
+		auto_sync_enforcing = repo.opts.get('auto-sync-enforcing')
+		if auto_sync_enforcing is not None:
+			auto_sync_enforcing = auto_sync_enforcing.strip()
+		self.auto_sync_enforcing = auto_sync_enforcing or None
 
 		#allow repos.conf to specify which branch to sync/use
 		sync_branch = repo_opts.get('sync-branch')
 		if sync_branch is not None:
 			sync_branch = sync_branch.strip()
 		self.sync_branch = sync_branch or None
+
+
+		self.sync_depth = repo_opts.get('sync-depth')
+		self.sync_hooks_only_on_change = repo_opts.get(
+			'sync-hooks-only-on-change', 'false').lower() == 'true'
+
+		self.module_specific_options = {}
 
 		# Not implemented.
 		format = repo_opts.get('format')
@@ -187,7 +202,7 @@ class RepoConfig(object):
 		self.format = format
 
 		location = repo_opts.get('location')
-		if location is not None and location.strip():
+	    if location is not None and location.strip():
 			if os.path.isdir(location) or portage._sync_mode:
 				location = os.path.realpath(location)
 		else:
