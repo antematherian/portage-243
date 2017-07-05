@@ -76,7 +76,8 @@ class GitSync(NewBase):
 
 	def sync_uri_check(self):
 	'''checks that self.repo.sync_uri matches the output of git remote -v i.e.
-	    checks if git and repos.conf agree on what the sync-uri is'''
+	checks if git and repos.conf agree on what the sync-uri is
+	'''
 		git_cmd = "cd %s && git remote -v" % self.repo.location
 		try:
 			rawremote = subprocess.check_output(git_cmd, shell=True, \
