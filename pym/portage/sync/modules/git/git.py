@@ -83,7 +83,7 @@ class GitSync(NewBase):
 		that the values in the repos.conf files match the ones in the git repositories,
 		and will automagically update the git repositories.
 		'''
-		if self.auto_sync_enforcing == "no" or self.autosync_enforcing is None:
+		if self.repo.auto_sync_enforcing == "no" or self.repo.auto_sync_enforcing is None:
 			git_cmd_opts = ""
 			if self.settings.get("PORTAGE_QUIET") == "1":
 				git_cmd_opts += " --quiet"
