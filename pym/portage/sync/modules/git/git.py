@@ -91,7 +91,7 @@ class GitSync(NewBase):
 	def nuke_repo(self):
 		'''removes the repository'''
 		rm_cmd = "rm -rf"
-		writemsg_level(rm_cmd + self.repo.location + "\n")
+		writemsg_level(rm_cmd + " " + self.repo.location + "\n")
 		exitcode = portage.process.spawn_bash("%s %s" % (rm_cmd, 
 				portage._shell_quote(self.repo.location)))
 		if exitcode != os.EX_OK:
