@@ -100,6 +100,8 @@ class GitSync(NewBase):
 		except subprocess.CalledProcessError:
 			return os.EX_NOTFOUND, True
 		for branchline in rawbranch.split("\n"):
+			if branchline == "":
+				continue
 			blist = branchline.strip().split()
 			if blist[0] == "*":
 				if blist[1] == self.repo.sync_branch:
@@ -114,7 +116,7 @@ class GitSync(NewBase):
 						return self.simple_update()
 					return self.simple_update()
 			elif not "HEAD" in blist[0] and "/" in blist[0]: #branch exists remotely
-				branchl = blist.split("/")
+				branchl = blist[0].split("/")
 				if branchl[2] == self.repo.sync_branch: #found the correct value
 					git_cmd = "cd %s && git checkout -b %s" % \
 						(self.repo.location, self.repo.sync_branch)
@@ -124,8 +126,13 @@ class GitSync(NewBase):
 					except subprocess.CalledProcessError:
 						return self.simple_update()
 					return self.simple_update()
-		#There should be a big red warning here that the branch doesn't exist
-		#if we get to this point. Instead we'll just sync the branch for now
+		#If we get to this point, it means that the branch doesn't exist on the remote
+		#or the git repository doesn't have info on it, i.e. was cloned incorrectly.
+		#Only handle the first case for now.
+		msg = "!!! cannot find branch: %s\n" % self.repo.sync_branch
+		msg += "!!! Fallback: syncing existing branch\n"
+		self.logger(self.xterm_titles, msg)
+		writemsg_level(msg, level=logging.ERROR, noiselevel=-1)
 		return self.simple_update()
 
 	def sync_uri_check(self):
