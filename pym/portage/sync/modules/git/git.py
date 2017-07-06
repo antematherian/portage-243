@@ -105,9 +105,9 @@ class GitSync(NewBase):
 				if blist[1] == self.repo.sync_branch:
 					return self.simple_update() #we're at the correct branch
 			elif "/" not in blist[0]:
-				if blist[0] == self.sync_branch: #branch exists locally, checkout
+				if blist[0] == self.repo.sync_branch: #branch exists locally, checkout
 					git_cmd = "cd %s && git checkout %s" % \
-						self.repo.location, self.repo.sync_branch
+						(self.repo.location, self.repo.sync_branch)
 					try:
 						subprocess.check_output(git_cmd, shell=True)
 					except subprocess.CalledProcessError:
@@ -117,7 +117,7 @@ class GitSync(NewBase):
 				branchl = blist.split("/")
 				if branchl[2] == self.repo.sync_branch: #found the correct value
 					git_cmd = "cd %s && git checkout -b %s" % \
-						self.repo.location, self.repo.sync_branch
+						(self.repo.location, self.repo.sync_branch)
 					git_cmd += " --track origin/%s" % self.repo.sync_branch
 					try:
 						subprocess.check_output(git_cmd, shell=True)
