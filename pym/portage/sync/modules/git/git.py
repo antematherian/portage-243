@@ -55,6 +55,7 @@ class GitSync(NewBase):
 		if self.repo.sync_depth is not None:
 			git_cmd_opts += " --depth %d" % self.repo.sync_depth
 			#required with shallow cloning to see all the other branches
+			#with git branch --all
 			git_cmd_opts += " --no-single-branch"
 		if self.repo.module_specific_options.get('sync-git-clone-extra-opts'):
 			git_cmd_opts += " %s" % self.repo.module_specific_options['sync-git-clone-extra-opts']
@@ -74,20 +75,6 @@ class GitSync(NewBase):
 			return (exitcode, False)
 		return (os.EX_OK, True)
 
-	def sync_uri_check(self):
-		'''checks that self.repo.sync_uri matches the output of git remote -v i.e.
-		checks if git and repos.conf agree on what the sync-uri is
-		'''
-		git_cmd = "cd %s && git remote -v" % self.repo.location
-		try:
-			rawremote = subprocess.check_output(git_cmd, shell=True, \
-				universal_newlines=True)
-		except subprocess.CalledProcessError:
-			return False
-		for remoteline in rawremote.split("\n"):
-			rlist = remoteline.split()
-			if rlist[0] == "origin" and rlist[2] == "(fetch)":
-				return self.repo.sync_uri == rlist[1]
 	def nuke_repo(self):
 		'''removes the repository'''
 		rm_cmd = "rm -rf"
@@ -101,6 +88,36 @@ class GitSync(NewBase):
 			writemsg_level(msg + "\n", level=logging.ERROR, noiselevel=-1)
 			return (exitcode, False)
 		return (os.EX_OK, True)
+
+	def sync_branch_check(self):
+		'''checks that self.repo.sync_branch matches the output of git branch -v i.e.
+		checks if git and repos.conf agree on what the sync-branch value is
+		'''
+		git_cmd = "cd %s && git branch -v" % self.repo.location
+		try:
+			rawbranch = subprocess.check_output(git_cmd, shell=True, \
+				universal_newlines=True)
+		except subprocess.CalledProcessError:
+			return False
+		for branchline in rawbranch.split("\n"):
+			blist = branchline.split()
+			if blist[0] == "*":
+				return self.repo.sync_branch == blist[1]
+
+	def sync_uri_check(self):
+		'''checks that self.repo.sync_uri matches the output of git remote -v i.e.
+		checks if git and repos.conf agree on what the sync-uri value is
+		'''
+		git_cmd = "cd %s && git remote -v" % self.repo.location
+		try:
+			rawremote = subprocess.check_output(git_cmd, shell=True, \
+				universal_newlines=True)
+		except subprocess.CalledProcessError:
+			return False
+		for remoteline in rawremote.split("\n"):
+			rlist = remoteline.split()
+			if rlist[0] == "origin" and rlist[2] == "(fetch)":
+				return self.repo.sync_uri == rlist[1]
 
 	def update(self):
 		''' Update existing git repository, and ignore the syncuri by default. We are
@@ -143,5 +160,10 @@ class GitSync(NewBase):
 			if self.repo.sync_uri is not None and self.repo.location is not None:
 				if not self.sync_uri_check():
 					self.nuke_repo()
-					self.new()
+					return self.new()
+			#If sync-uri matches, check that sync-branch matches too. Otherwise,
+			#switch to the correct branch. 
+			if self.repo.sync_branch is not None and self.repo.location is not None:
+				if not self.sync_branch_check():
+					print("sync-branch does not match")
 			return (os.EX_OK, True)
