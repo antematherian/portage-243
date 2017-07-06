@@ -127,20 +127,6 @@ class GitSync(NewBase):
 		#There should be a big red warning here that the branch doesn't exist
 		#if we get to this point. Instead we'll just sync the branch for now
 		return self.simple_update()
-	def sync_branch_check(self):
-		'''checks that self.repo.sync_branch matches the output of git branch -v i.e.
-		checks if git and repos.conf agree on what the sync-branch value is
-		'''
-		git_cmd = "cd %s && git branch -v" % self.repo.location
-		try:
-			rawbranch = subprocess.check_output(git_cmd, shell=True, \
-				universal_newlines=True)
-		except subprocess.CalledProcessError:
-			return False
-		for branchline in rawbranch.split("\n"):
-			blist = branchline.split()
-			if blist[0] == "*":
-				return self.repo.sync_branch == blist[1]
 
 	def sync_uri_check(self):
 		'''checks that self.repo.sync_uri matches the output of git remote -v i.e.
@@ -207,8 +193,5 @@ class GitSync(NewBase):
 			#If sync-uri matches, check that sync-branch matches too. Otherwise,
 			#switch to the correct branch. 
 			if self.repo.sync_branch is not None and self.repo.location is not None:
-				if not self.sync_branch_check():
-					return self.sync_branch_update()
-				else:
-					return self.simple_update()
+				return self.sync_branch_update()
 			return self.simple_update()
