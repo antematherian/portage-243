@@ -660,7 +660,7 @@ setup(
 		['$sysconfdir', ['cnf/etc-update.conf', 'cnf/dispatch-conf.conf']],
 		['$logrotatedir', ['cnf/logrotate.d/elog-save-summary']],
 		['$portage_confdir', [
-			'cnf/make.conf.example', 'cnf/make.globals', 'cnf/repos.conf']],
+			'cnf/make.conf.example', 'cnf/make.globals']],
 		['$portage_setsdir', ['cnf/sets/portage.conf']],
 		['$docdir', ['NEWS', 'RELEASE-NOTES']],
 		['$portage_base/bin', ['bin/deprecated-path']],

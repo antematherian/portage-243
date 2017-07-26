@@ -1424,7 +1424,7 @@ def _validate_deps(mysettings, myroot, mydo, mydbapi):
 			return 1
 
 	if not pkg.built and \
-		mydo not in ("digest", "help", "manifest") and \
+		mydo not in ("digest", "help", "manifest", "fetch") and \
 		pkg._metadata["REQUIRED_USE"] and \
 		eapi_has_required_use(pkg.eapi):
 		result = check_required_use(pkg._metadata["REQUIRED_USE"],
